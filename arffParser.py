@@ -1,6 +1,8 @@
 import os
 import numpy as np
 from scipy.io import wavfile
+import operator
+import sys
 
 def run():
 	print "Creating file voiceCepstrums.arff..."
@@ -19,11 +21,6 @@ def run():
 	output.write("@attribute coefficient3 Continuous\n")
 	output.write("@attribute coefficient4 Continuous\n")
 	output.write("@attribute coefficient5 Continuous\n")
-	output.write("@attribute coefficient6 Continuous\n")
-	output.write("@attribute coefficient7 Continuous\n")
-	output.write("@attribute coefficient8 Continuous\n")
-	output.write("@attribute coefficient9 Continuous\n")
-	output.write("@attribute coefficient10 Continuous\n")
 	output.write("@attribute gender {male, female}\n\n")
 
 	output.write("@data\n")
@@ -32,25 +29,35 @@ def run():
 		if filename.endswith(".wav") or filename.endswith(".WAV"):
 			sampFreq, data = wavfile.read('AudioRecordings/Male/' + filename)
 			cepstrum = getCepstrum(data)
-			toOutput = []
-			for coefficient in cepstrum:
+			frequencies = {}
+			for i in range(0, len(data)):
+				coefficient = data[i]
 				if coefficient[0] != float('Inf') and coefficient[0] != 0.0:
-					toOutput.append(coefficient[0])
-			for i in range(0, 10):
-				output.write(str(toOutput[i]))
+					frequency = (i*sampFreq)/len(data)
+					frequencies[frequency] = coefficient[0];
+			sortedFrequencies = sorted(frequencies.items(), key=operator.itemgetter(1), reverse=True);
+			sortedFrequencies = sortedFrequencies
+			for i in range(0, 5):
+				output.write(str(sortedFrequencies[i][0]))
 				output.write(", ")
 			output.write("male\n")
 
 	for filename in females:
 		if filename.endswith(".wav") or filename.endswith(".WAV"):
 			sampFreq, data = wavfile.read('AudioRecordings/Female/' + filename)
+			# time =float(len(data))/float(sampFreq)
+			# frequency = 
 			cepstrum = getCepstrum(data)
-			toOutput = []
-			for coefficient in cepstrum:
+			frequencies = {}
+			for i in range(0, len(data)):
+				coefficient = data[i]
 				if coefficient[0] != float('Inf') and coefficient[0] != 0.0:
-					toOutput.append(coefficient[0])
-			for i in range(0, 10):
-				output.write(str(toOutput[i]))
+					frequency = (i*44100)/len(data)
+					frequencies[frequency] = coefficient[0];
+			sortedFrequencies = sorted(frequencies.items(), key=operator.itemgetter(1), reverse=True);
+			sortedFrequencies = sortedFrequencies
+			for i in range(0, 5):
+				output.write(str(sortedFrequencies[i][0]))
 				output.write(", ")
 			output.write("female\n")
 
