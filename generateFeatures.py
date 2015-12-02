@@ -3,10 +3,10 @@ import numpy as np
 from scipy.io import wavfile
 import operator
 import sys
-
+from features import mfcc
 
 debugging = True
-outputFilename = "voiceCepstrums.arff"
+outputFilename = "test10.arff"
 
 
 ########################
@@ -25,6 +25,11 @@ def run():
 		("coefficient3", "Continuous"),
 		("coefficient4", "Continuous"),
 		("coefficient5", "Continuous"),
+		("coefficient6", "Continuous"),
+		("coefficient7", "Continuous"),
+		("coefficient8", "Continuous"),
+		("coefficient9", "Continuous"),
+		("coefficient10", "Continuous"),
 		("gender", ["male", "female"])
 	]
 	writeArffAttributes(features, output)
@@ -61,29 +66,17 @@ def generateFeatures(filename, outputClass):
 	# Read the audio file.
 	sampFreq, data = wavfile.read(filename)
 
-	# Find the cepstrum values and sort them.
-	cepstrum = getCepstrum(data)
-	frequencies = {}
-	for i in range(0, len(data)):
-		coefficient = data[i]
-		if coefficient[0] != float('Inf') and coefficient[0] != 0.0:
-			frequency = (i*sampFreq)/len(data)
-			frequencies[frequency] = coefficient[0];
-	sortedFrequencies = sorted(frequencies.items(), key=operator.itemgetter(1), reverse=True);
-	sortedFrequencies = sortedFrequencies
-
-	# Add the 5 most common cepstrum values to the features.
-	for i in range(0, 5):
-		instance.append(str(sortedFrequencies[i][0]))
+	# Compute cepstral coefficients for each window
+	mfcc_feat = mfcc(data, samplerate=sampFreq, numcep=10)
+	# Compute mean vector from ceptral coefficients
+	mean_vector = mfcc_feat.mean(axis=0)
+	for i in range(0, len(mean_vector)):
+		instance.append(str(mean_vector[i]))
 
 	# Add the output class too.
 	instance.append(outputClass)
 
 	return instance
-
-def getCepstrum(input):
-	return np.abs(np.fft.ifft((np.log((np.abs(np.fft.fft(input)))*(np.abs(np.fft.fft(input)))))))*np.abs(np.fft.ifft((np.log((np.abs(np.fft.fft(input)))*(np.abs(np.fft.fft(input)))))))
-
 
 ########################
 # ARFF FILE GENERATION
