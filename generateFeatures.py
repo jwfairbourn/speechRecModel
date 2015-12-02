@@ -1,3 +1,4 @@
+import argparse
 import os
 import numpy as np
 from scipy.io import wavfile
@@ -6,32 +7,20 @@ import sys
 from features import mfcc
 
 debugging = True
-outputFilename = "test10.arff"
+DEFAULT_COEFFICIENTS = 10
 
 
 ########################
 # HIGH-LEVEL FUNCTIONS
 ########################
 
-def run():
+def run(coefficients, outputFilename):
 
 	info("Creating file " + outputFilename + "...")
 
 	output = open(outputFilename, 'w')
 
-	features = [
-		("coefficient1", "Continuous"),
-		("coefficient2", "Continuous"),
-		("coefficient3", "Continuous"),
-		("coefficient4", "Continuous"),
-		("coefficient5", "Continuous"),
-		("coefficient6", "Continuous"),
-		("coefficient7", "Continuous"),
-		("coefficient8", "Continuous"),
-		("coefficient9", "Continuous"),
-		("coefficient10", "Continuous"),
-		("gender", ["male", "female"])
-	]
+	features = generateAttributes(coefficients)
 	writeArffAttributes(features, output)
 
 	maleFilenames, femaleFilenames = getAudioFiles()
@@ -40,18 +29,27 @@ def run():
 	     str(len(femaleFilenames)) + " female recordings.")
 
 	info("Generating features...")
-	data = generateFeatureData(maleFilenames, femaleFilenames)
+	data = generateFeatureData(maleFilenames, femaleFilenames, coefficients)
 	writeArffData(data, output)
 
 	info("Done.")
 
-def generateFeatureData(maleFilenames, femaleFilenames):
+def generateAttributes(coefficients):
+	features = []
+	for i in range(coefficients):
+		n = i + 1
+		feature = ("coefficient" + str(n), "Continuous")
+		features.append(feature)
+	features.append( ("gender", ["male", "female"]) )
+	return features
+
+def generateFeatureData(maleFilenames, femaleFilenames, coefficients):
 	data = []
 	for filename in maleFilenames:
-		features = generateFeatures(filename, "male")
+		features = generateFeatures(filename, "male", coefficients)
 		data.append(features)
 	for filename in femaleFilenames:
-		features = generateFeatures(filename, "female")
+		features = generateFeatures(filename, "female", coefficients)
 		data.append(features)
 	return data
 
@@ -60,14 +58,14 @@ def generateFeatureData(maleFilenames, femaleFilenames):
 # AUDIO PROCESSING
 ####################
 
-def generateFeatures(filename, outputClass):
+def generateFeatures(filename, outputClass, coefficients):
 	instance = []
 
 	# Read the audio file.
 	sampFreq, data = wavfile.read(filename)
 
 	# Compute cepstral coefficients for each window
-	mfcc_feat = mfcc(data, samplerate=sampFreq, numcep=10)
+	mfcc_feat = mfcc(data, samplerate=sampFreq, numcep=coefficients)
 	# Compute mean vector from ceptral coefficients
 	mean_vector = mfcc_feat.mean(axis=0)
 	for i in range(0, len(mean_vector)):
@@ -139,4 +137,12 @@ def debug(message):
 ########
 
 if __name__ == "__main__":
-    run()
+	parser = argparse.ArgumentParser(prog='Feature Generator', description='CS478 Group Project: Speaker gender prediction based on a short phrase', add_help=True)
+	parser.add_argument('-c', '--coefficients', type=int, action='store', help='The number of Cepstrum coefficients to generate', default=DEFAULT_COEFFICIENTS)
+	parser.add_argument('output', metavar="output", type=str, action='store', help='The ARFF file to save to')
+
+	args = parser.parse_args()
+	coefficients = args.coefficients
+	outputFilename = args.output
+
+	run(coefficients, outputFilename)
