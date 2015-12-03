@@ -5,6 +5,7 @@ from scipy.io import wavfile
 import operator
 import sys
 from features import mfcc
+import matplotlib.pyplot as plt
 
 debugging = True
 DEFAULT_COEFFICIENTS = 10
@@ -14,7 +15,7 @@ DEFAULT_COEFFICIENTS = 10
 # HIGH-LEVEL FUNCTIONS
 ########################
 
-def run(coefficients, outputFilename):
+def run(coefficients, outputFilename, graphFilename):
 
 	info("Creating file " + outputFilename + "...")
 
@@ -31,6 +32,8 @@ def run(coefficients, outputFilename):
 	info("Generating features...")
 	data = generateFeatureData(maleFilenames, femaleFilenames, coefficients)
 	writeArffData(data, output)
+	if graphFilename is not None:
+		createGraph(data, graphFilename)
 
 	info("Done.")
 
@@ -102,6 +105,28 @@ def writeArffData(data, output):
 			first = False
 		output.write("\n")
 
+####################
+# GRAPH GENERATION
+####################
+def createGraph(data, graphFilename):
+	maleX = []
+	maleY = []
+	femaleX = []
+	femaleY = []
+	for instance in data:
+		numCoefficients = len(instance)-1
+		for coefficient in range(0, numCoefficients):
+			if instance[len(instance)-1] == 'male':
+				maleX.append(coefficient)
+				maleY.append(float(instance[coefficient]))
+			else:
+				femaleX.append(coefficient+.2)
+				femaleY.append(float(instance[coefficient]))
+	plt.figure()
+	plt.scatter(maleX, maleY, color="blue")
+	plt.scatter(femaleX, femaleY, color="red")
+	plt.savefig(graphFilename)
+
 
 ##############
 # FILESYSTEM
@@ -140,9 +165,11 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(prog='Feature Generator', description='CS478 Group Project: Speaker gender prediction based on a short phrase', add_help=True)
 	parser.add_argument('-c', '--coefficients', type=int, action='store', help='The number of Cepstrum coefficients to generate', default=DEFAULT_COEFFICIENTS)
 	parser.add_argument('output', metavar="output", type=str, action='store', help='The ARFF file to save to')
+	parser.add_argument('-g', '--graph', type=str, action='store', help='The filename to save a graph to', default=None)
 
 	args = parser.parse_args()
 	coefficients = args.coefficients
 	outputFilename = args.output
+	graphFilename = args.graph
 
-	run(coefficients, outputFilename)
+	run(coefficients, outputFilename, graphFilename)
