@@ -38,7 +38,7 @@ def generateAttributes(coefficients):
 	features = []
 	for i in range(coefficients):
 		n = i + 1
-		feature = ("coefficient" + str(n), "Continuous")
+		feature = ("coefficient" + str(n), "real")
 		features.append(feature)
 	features.append( ("gender", ["male", "female"]) )
 	return features
@@ -86,18 +86,18 @@ def writeArffAttributes(features, output):
 		key = feature[0]
 		value = feature[1]
 		if type(value) == list:
-			output.write("@attribute " + key + " {" + ", ".join(value) + "}\n")
+			output.write("@ATTRIBUTE " + key + " {" + ",".join(value) + "}\n")
 		else:
-			output.write("@attribute " + key + " " + value + "\n")
+			output.write("@ATTRIBUTE " + key + " " + value + "\n")
 	output.write("\n")
 
 def writeArffData(data, output):
-	output.write("@data\n")
+	output.write("@DATA\n")
 	for instance in data:
 		first = True
 		for feature in instance:
 			if not first:
-				output.write(", ")
+				output.write(",")
 			output.write(str(feature))
 			first = False
 		output.write("\n")
