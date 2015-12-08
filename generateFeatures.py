@@ -33,7 +33,8 @@ def run(coefficients, outputFilename, graphFilename):
 	data = generateFeatureData(maleFilenames, femaleFilenames, coefficients)
 	writeArffData(data, output)
 	if graphFilename is not None:
-		createGraph(data, graphFilename)
+		# createGraph(data, graphFilename)
+		createAverageGraph(data, graphFilename)
 
 	info("Done.")
 
@@ -109,6 +110,7 @@ def writeArffData(data, output):
 # GRAPH GENERATION
 ####################
 def createGraph(data, graphFilename):
+	coefficientIds = range(len(data[0])-1)
 	maleX = []
 	maleY = []
 	femaleX = []
@@ -123,10 +125,32 @@ def createGraph(data, graphFilename):
 				femaleX.append(coefficient+.2)
 				femaleY.append(float(instance[coefficient]))
 	plt.figure()
+	plt.xlim(0, coefficientIds[len(coefficientIds)-1])
 	plt.scatter(maleX, maleY, color="blue")
 	plt.scatter(femaleX, femaleY, color="red")
 	plt.savefig(graphFilename)
 
+def createAverageGraph(data, graphFilename):
+	maleData = filter(lambda instance: instance[len(instance)-1] == 'male', data)
+	femaleData = filter(lambda instance: instance[len(instance)-1] == 'female', data)
+	coefficientIds = range(len(data[0])-1)
+	maleAverages = generateAverages(maleData)
+	femaleAverages = generateAverages(femaleData)
+	plt.figure()
+	plt.xlim(0, coefficientIds[len(coefficientIds)-1])
+	plt.scatter(coefficientIds, maleAverages, color="blue")
+	plt.scatter(coefficientIds, femaleAverages, color="red")
+	plt.savefig(graphFilename)
+
+
+def generateAverages(instances):
+	numCoefficients = len(instances[0])-1
+	sums = np.zeros(numCoefficients, dtype="float32")
+	for instance in instances:
+		for coefficient in range(0, numCoefficients):
+			sums[coefficient] += float(instance[coefficient])
+	sums /= len(instances)
+	return sums
 
 ##############
 # FILESYSTEM
