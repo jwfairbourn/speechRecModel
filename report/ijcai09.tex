@@ -1,11 +1,5 @@
 %%%% ijcai09.tex
 
-\typeout{IJCAI-09 Instructions for Authors}
-
-% These are the instructions for authors for IJCAI-09.
-% They are the same as the ones for IJCAI-07 with superficical wording
-%   changes only.
-
 \documentclass{article}
 % The file ijcai09.sty is the style file for IJCAI-09 (same as ijcai07.sty).
 \usepackage{ijcai09}
@@ -36,206 +30,151 @@
 % page charge instructions.
 % Put where the files are available in the appropriate places.
 
-\title{478 Group Project Formatting Instructions\thanks{These match the formatting instructions of IJCAI-07. The support of IJCAI, Inc. is acknowledged.}}
-\author{Tony Martinez \\
+\title{Inferring Gender from Audio Recordings}
+\author{Jason Fairbourn, Mike Free, and Andrew Jensen \\
+CS 478, Fall 2015\\
 Department of Computer Science\\
-Brigham Young University \\
-martinez@cs.byu.edu}
+Brigham Young University}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-  Your abstract should concisely answer the following three questions: 1) what problem are you addressing? 2) what approach are you taking to solve the problem? 3) what are your results?
+In this project, we investigate different methods of using machine learning to differentiate between recordings of male voices and female voices.  We begin by calculating the power cepstrum of each recording and using the cepstral coefficients as features.  After some initial results, we then investigate the effectiveness of the Mel Frequency Cepstral Coefficients (MFCC) as features.  We use this approach to generate data for several different learning models, ultimately discovering that KNN with a k-value of 1 produces the most accurate prediction accuracy.
 \end{abstract}
 
 \section{Introduction}
 
-The {\it 478 Group Projects} will follow the format of papers submitted to the 2009 {\it International Joint Conference on Artificial Intelligence}.  Your paper is due at the beginning of class the day you give the oral presentation.  This document briefly describes what is expected for your group's paper.
+The field of speech recognition is broad and it could be said that it is still largely unsolved. Speech recognition has many different applications, from authentication to voice commands. Technology to recognize voice commands is beginning to enter mainstream devices with tools like Apple's Siri and Microsoft's Cortana.
 
-\subsection{Length of Papers}
+In order to predict what a speaker says, signal processing techniques are used to analyze the audio recording of the command. These techniques generate features that are run through a learning model that attempts to label the instance. The features and labels depend on the application. For example, a voice command application would generate features related to vowel and consonant sounds, then predict common words that match the pattern in the features. A speaker recognition application - an application that recognizes and distinguishes the voices of various speakers - compares the generated features to labeled features of each speaker that exist in the training set.
 
-Your paper will likely be about six pages in the IJCAI format: 1 page for title, abstract, and introduction to your problem, 2 pages for description of your approach to solving your problem, 2 pages for presenting results, and 1 page for discussion, conclusions and future work.  These are rough guidelines and individual papers may vary.
+In a speaker recognition problem, we can choose the type of application by the audio that we gather and the way we label it. We could build an application to recognize the sound of a single person’s voice by labeling recordings of that person as matches and multiple other people as non-matches. We could also build a more generic speaker recognition model by comparing one group of speakers with similar voices to another, for example, males and females. We chose to create a speaker recognition application to accomplish this task.
 
+\section{Methods}
 
-\subsection{Word Processing Software}
+\subsection{Data Source}
 
-As indicated above, we are "borrowing" IJCAI document style templates for this assignment.  IJCAI has kindly prepared and made available a set of \LaTeX{} macros and a Microsoft Word template for use in formatting
-your paper. You are \emph{strongly} encouraged to use one of these two formats.  If you are using some other word processing software, please follow the format instructions given below and ensure that your final paper looks as much like this sample as possible.
+In order to do gender recognition from speech, we needed to gather voice recordings of people saying some word or phrase. Initially, we decided that we would like to have at least a little consistency in our data, so we selected one type of high-quality microphone to train our model to: Olympus LS-3. In addition to having a consistent recording, we also wanted to have a consistent phrase.  We each went from door to door and from family gatherings to friend gatherings, collecting voice recordings of people saying the phrase "open sesame."
 
-\section{Style and Format}
+Though we did have some consistencies, we also wanted to have some variations so as to train our learning model well enough. We recorded each person three to five times, each time having them use different inflections. For example, we would ask the individual to say "open sesame" as a statement and then as a question. Another variation we introduced was background noise. We had a subset of recordings that were done at a family Thanksgiving event, which had some people talking in the background. We hoped that with these slight variations, we would be able to have enough data to allow our learning model to make the best guess possible.
 
-\subsection{Layout}
+One potential problem that we were cautious about was the difference in ages of our speakers. A younger male boy could sound more like a female voice than a male one. So as a precaution, we also wrote down the ages of the individuals.
 
-Print manuscripts two columns to a page, in the manner in which these
-instructions are printed. The exact dimensions for pages are:
-\begin{itemize}
-\item left and right margins: .75$''$
-\item column width: 3.375$''$
-\item gap between columns: .25$''$
-\item top margin---first page: 1.375$''$
-\item top margin---other pages: .75$''$
-\item bottom margin: 1.25$''$
-\item column height---first page: 6.625$''$
-\item column height---other pages: 9$''$
-\end{itemize}
+We ended up with 106 male recordings and 72 female recordings which is roughly a 60/40 split. Due to our current location, most of our recordings were of people within the college age range. 
 
-All measurements assume an 8-1/2$''$ $\times$ 11$''$ page size. For
-A4-size paper, use the given top and left margins, column width,
-height, and gap, and modify the bottom and right margins as necessary.
+\subsection{Initial Model}
 
-\subsection{Title and Author Information}
+In order to use machine learning to distinguish our audio files between male and female, we needed a way to extract relevant features from each recording.  To do this, we decided to use the power cepstrum, which provides a means to represent the rate of change in different frequency bands of an audio file.  It is calculated by taking the square of the absolute value of the Fourier transform of the audio signal, and then taking the inverse Fourier transform of the log of that result, and then finally taking the square of the absolute value of the resulting values to end up with the final power cepstrum.  In equation form, the power cepstrum is defined as follows:
 
-Center the title on the entire width of the page in a 14-point bold
-font. Below it, center the author name(s) in a 12-point bold font, and
-then center the address(es) in a 12-point regular font. Credit to a
-sponsoring agency can appear on the first page as a footnote.
+$$
+\left |{F}^{-1}\left \{log(\left |F\left \{f(t)\right \}\right |^2)\right \}  \right |^2 
+$$
 
-\subsection{Abstract}
+To apply this equation to each of our audio files, we created a Python script that parses through each file and uses the Numpy package to perform the required operations as defined above.  Our initial implementation would then store the first ten non-infinite coefficients as features for each audio file and either male or female as the classification (determined by the name of the directory that contained the file).  These features and classifications were then output to a file following standard .arff syntax.
 
-Place the abstract at the beginning of the first column 3$''$ from the
-top of the page, unless that does not leave enough room for the title
-and author information. Use a slightly smaller width than in the body
-of the paper. Head the abstract with ``Abstract'' centered above the
-body of the abstract in a 12-point bold font. The body of the abstract
-should be in the same font as the body of the paper.
+Because of the model’s success with predicting nominal classes from continuous features, we decided that we would use the Multi-Layer Perceptron as our initial testing model.  However, this model requires a large amount of input data in order to be effective, and since we were still in the process of manually collecting our data, we decided to use the Perceptron as an initial baseline estimate.  Once we had gathered enough data, we would then continue our experiments using the MLP model.
 
-The abstract should be a concise, one-paragraph summary describing the
-general thesis and conclusion of your paper. A reader should be able
-to learn the purpose of the paper and the reason for its importance
-from the abstract. The abstract should be no more than 200 words long.
+\section{Initial Results}
 
-\subsection{Text}
+We began our initial experiments by testing the Perceptron model against the arff file generated by our initial Python script. Using 5-fold cross validation, we obtained the following result:
 
-The main body of the text immediately follows the abstract. Use
-10-point type in a clear, readable font with 1-point leading (10 on
-11).
+\begin{verbatim}
+Calculating accuracy using
+cross-validation...
 
-Indent when starting a new paragraph, except after major headings.
+Number of folds: 5
+Fold=0, Accuracy=0.6666666666666666
+Fold=1, Accuracy=0.5
+Fold=2, Accuracy=0.25
+Fold=3, Accuracy=1.0
+Fold=4, Accuracy=1.0
+Average time to train (in seconds): 0.0066
+Mean accuracy=0.6833333333333333
+\end{verbatim}
 
-\subsection{Headings and Sections}
+Repeating our test with different initial weights yielded similar results, and running our model with a 75/25 training/test split resulted in accuracies ranging from roughly 60\% to 80\%.  While these results appeared to perform better than a simple 50/50 guess, it was clear that further improvements needed to be made and we began investigating alternative feature extraction methods.
 
-When necessary, headings should be used to separate major sections of
-your paper. (These instructions use many headings to demonstrate their
-appearance; your paper should have fewer headings.)
+\section{Improvements}
 
-\subsubsection{Section Headings}
+\subsection{Data Refinement}
 
-Print section headings in 12-point bold type in the style shown in
-these instructions. Leave a blank space of approximately 10 points
-above and 4 points below section headings.  Number sections with
-arabic numerals.
+\subsubsection{Windowing}
 
-\subsubsection{Subsection Headings}
+An initial approach to improving the accuracy of our model was to break the power cepstrum into windowed segments and then taking the index of the highest cepstral coefficient for that segment.  We then attempted to calculate the original signal frequency that resulted in this coefficient, where the resulting frequency is the sampling rate divided by the coefficient index.  The top ten frequencies for each signal were then output as features in our resulting arff file.  Running this model through our perceptron using 10-fold cross validation resulted in the following:
 
-Print subsection headings in 11-point bold type. Leave a blank space
-of approximately 8 points above and 3 points below subsection
-headings. Number subsections with the section number and the
-subsection number (in arabic numerals) separated by a
-period.
+\begin{verbatim}
+Calculating accuracy using
+cross-validation...
+Number of folds: 10
+Fold=0, Accuracy=1.0
+Fold=1, Accuracy=0.5
+Fold=2, Accuracy=0.5
+Fold=3, Accuracy=0.0
+Fold=4, Accuracy=0.0
+Fold=5, Accuracy=1.0
+Fold=6, Accuracy=1.0
+Fold=7, Accuracy=0.5
+Fold=8, Accuracy=0.0
+Fold=9, Accuracy=0.5
+Average time to train (in seconds): 0.0039
+Mean accuracy=0.5
+\end{verbatim}
 
-\subsubsection{Subsubsection Headings}
+As we can see, this approach did not significantly improve our model as expected.  In addition, 75/25 random splits also resulted in accuracies similar to what we had experienced previously (roughly 60\% to 80\%).  As such, we decided not to pursue this model any further.
 
-Print subsubsection headings in 10-point bold type. Leave a blank
-space of approximately 6 points above subsubsection headings. Do not
-number subsubsections.
+\subsubsection{Mel-frequency Cepstral Coefficients (MFCC)}
 
-\subsubsection{Special Sections}
+We continued to research strategies for feature generation and learned about Mel-frequency Cepstral Coefficients. The mel scale (short for “melody”) is a logarithmic scale to map frequencies in such a way that pitches that are perceived as equally far apart are equally spaced on the scale. In other words, the mel scale converts pitches to a scale that more closely matches human hearing.
 
-You may include an unnumbered acknowledgments section, including
-acknowledgments of help from colleagues, financial support, and
-permission to publish.
+To generate Mel-frequency coefficients, we take the Fourier transform of the signal as the first step of generating the cepstrum, but we then map the frequencies from the result of the Fourier transform to the mel scale before we continue. This places the generated cepstral coefficients evenly apart in human hearing ranges. In a way, this makes our learning model “hear” the recordings the same way that a human hears them.
 
-Any appendices directly follow the text and look like sections, except
-that they are numbered with capital letters instead of arabic
-numerals.
+We noticed a large improvement in accuracy by using MFCCs as features. Our simple Perceptron learner achieved 92\% training accuracy on the data set using 10-fold cross validation, where earlier methods of feature generation only achieved as high as 75\% accuracy.
 
-The references section is headed ``References,'' printed in the same
-style as a section heading but without a number. A sample list of
-references is given at the end of these instructions. Use a consistent
-format for references, such as that provided by Bib\TeX{}. The reference
-list should not include unpublished work.
+TODO: insert graph
 
-\subsection{Citations}
+\subsection{Learning Model Refinement}
 
-Citations within the text should include the author's last name and
-the year of publication, for example~\cite{gottlob:nonmon}.  Append
-lowercase letters to the year in cases of ambiguity.  Treat multiple
-authors as in the following examples:~\cite{abelson-et-al:scheme}
-or~\cite{bgf:Lixto} (for more than two authors) and
-\cite{brachman-schmolze:kl-one} (for two authors).  If the author
-portion of a citation is obvious, omit it, e.g.,
-Nebel~\shortcite{nebel:jair-2000}.  Collapse multiple citations as
-follows:~\cite{gls:hypertrees,levesque:functional-foundations}.
-\nocite{abelson-et-al:scheme}
-\nocite{bgf:Lixto}
-\nocite{brachman-schmolze:kl-one}
-\nocite{gottlob:nonmon}
-\nocite{gls:hypertrees}
-\nocite{levesque:functional-foundations}
-\nocite{levesque:belief}
-\nocite{nebel:jair-2000}
+We chose to use the Weka software to help us quickly select optimal learning models. We tried many different models including Perceptron, VotedPerceptron, Multilayer Perceptron, Dagging, Hyperpipes, DecisionTable, and KNN. Below are the resulting accuracies using 10 fold cross validation for each of these models:
 
-\subsection{Footnotes}
+TODO: insert table
 
-Place footnotes at the bottom of the page in a 9-point font.  Refer to
-them with superscript numbers.\footnote{This is how your footnotes
-should appear.} Separate them from the text by a short
-line.\footnote{Note the line separating these footnotes from the
-text.} Avoid footnotes as much as possible; they interrupt the flow of
-the text.
+Overall, we found that the Perceptron, MLP, and KNN learning models performed the best and we decided to investigate and improve them further.
 
-\section{Illustrations}
+\subsubsection{Introduction of background noise}
 
-Place all illustrations (figures, drawings, tables, and photographs)
-throughout the paper at the places where they are first discussed,
-rather than at the end of the paper. If placed at the bottom or top of
-a page, illustrations may run across both columns.
+As mentioned in 2.1, we gathered a subset of voice recordings done with some background noise. We were interested in seeing which of the three best-thus-far learning models would perform better when we introduced the background noise. Without noise, the MLP and KNN learning models were nearly equal, but when we introduced the recordings with background noise, we found that the accuracy of MLP dropped significantly more than the KNN learning model.
 
-Illustrations must be rendered electronically or scanned and placed
-directly in your document. All illustrations should be in black and
-white, as color illustrations may cause problems. Line weights should
-be 1/2-point or thicker. Avoid screens and superimposing type on
-patterns as these effects may not reproduce well.
+TODO: insert graph
 
-Number illustrations sequentially. Use references of the following
-form: Figure 1, Table 2, etc. Place illustration numbers and captions
-under illustrations. Leave a margin of 1/4-inch around the area
-covered by the illustration and caption.  Use 9-point type for
-captions, labels, and other text in illustrations.
+\subsubsection{Finding the optimal K for KNN}
 
-\section*{Acknowledgments}
+We then decided to continue experimenting with KNN and try to determine the optimal value for K given our data set.  To do this, we carried out 10-fold cross validation tests with k-values of 1, 3, 5, and 7.  For each k-value, we also tested different amounts of cepstral coefficients used as features in the model.  These counts included 5, 10, 15, 20, and 25 coefficients.  This resulted in a total of 20 tests, the results of which are displayed in the following graph:
 
-The preparation of these instructions and the \LaTeX{} and Bib\TeX{}
-files that implement them was supported by Schlumberger Palo Alto
-Research, AT\&T Bell Laboratories, and Morgan Kaufmann Publishers.
-Preparation of the Microsoft Word file was supported by IJCAI.  An
-early version of this document was created by Shirley Jowell and Peter
-F. Patel-Schneider.  It was subsequently modified by Jennifer
-Ballentine and Thomas Dean, Bernhard Nebel, and Daniel Pagenstecher.
-These instructions are the same as the ones for IJCAI--05, prepared by
-Kurt Steinkraus, Massachusetts Institute of Technology, Computer
-Science and Artificial Intelligence Lab.
+TODO: insert graph
+
+It is interesting to note that an unusual pattern is emerging.  As we add more cepstral coefficients into our training data, the accuracy of the learning model increases, as opposed to decreasing as we initially expected.  In addition, it appears that k-values of 1 and 3 appear to be more accurate than other k-values.  While it is possible that this is explained by the fact that our training data contained 3-5 recordings of the same person, it is still interesting to observe that as more coefficients are used in the data, the more closely the model can represent gender based on the MFCC of the signal.
+
+\section{Final Results and Conclusions}
+
+Among all of our different learning models, all of them scored with a better accuracy than the baseline, which is 50\% - male or female. In the end, we found that the Perceptron, MLP, and KNN learning models scored the highest, each of them in the range of  88 to 98 percent.
+
+TODO: insert graph
+
+We believe that using the MFCC algorithm on our audio recordings was truly an essential part in increasing our prediction accuracy.
+
+It seemed like we had a clear winner with KNN where K = 1 when we introduced recordings with background noise; however, it was pointed out to us afterwards that perhaps the three to five recordings of each person could have been the cause of the KNN model working better with our 10 fold cross validation method. Essentially, we were training our model with a few of the 3-5 recordings per person and testing with the rest. This would certainly have an effect on our test set accuracies and perhaps our choice of K for KNN. With more time, we would like to improve our accuracy results with a more “pure” test set.
+
+\section{Future Work}
+
+When we took on this project, we knew that there would be more ways to extend this idea of predicting gender from speech. What if we could detect the ages of an individual based on their speech? Knowing both the gender and the age of an individual could play a major part in relevant searches and ads.
+
+We would also like to explore the idea of doing speaker recognition in order to unlock mobile phones or other locks. We believe this is very possible, but we would also like to see if we could catch any attempt to forge a person’s voice, i.e. using a recording of a person to unlock his phone.
+
+In this project, we tried to control certain aspects of the data gathering by using a specific voice recording device. Lower quality microphones would introduce more noise to the data, so making our model more robust to these recordings would be another problem to solve. We’d like to gather recordings from microphones on mobile phones and computers and see how that affects our accuracy. One thing that we could do is synthesize random noise in all of our recordings and try to find ways to eliminate that noise.
 
 \appendix
-
-\section{\LaTeX{} and Word Style Files}\label{stylefiles}
-
-
-The \LaTeX{} files are {\tt ijcai09.sty} and {\tt ijcai09.tex}, and
-the Bib\TeX{} files are {\tt named.bst} and {\tt ijcai09.bib}. The
-\LaTeX{} style file is for version 2e of \LaTeX{}, and the Bib\TeX{}
-style file is for version 0.99c of Bib\TeX{} ({\em not} version
-0.98i). The {\tt ijcai09.sty} file is the same as the {\tt
-ijcai07.sty} file used for IJCAI--07.
-
-The Microsoft Word style file consists of a single template file, {\tt
-ijcai09.dot}. This template is the same as the one used for
-IJCAI--07.
-
-These Microsoft Word and \LaTeX{} files contain the source of the
-present document and may serve as a formatting sample.  
 
 
 %% The file named.bst is a bibliography style file for BibTeX 0.99c
