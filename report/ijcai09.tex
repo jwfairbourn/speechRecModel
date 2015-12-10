@@ -136,6 +136,8 @@ We continued to research strategies for feature generation and learned about Mel
 
 To generate Mel-frequency coefficients, we take the Fourier transform of the signal as the first step of generating the cepstrum, but we then map the frequencies from the result of the Fourier transform to the mel scale before we continue. This places the generated cepstral coefficients evenly apart in human hearing ranges. In a way, this makes our learning model "hear" the recordings the same way that a human hears them.
 
+We used a python library that implements the Mel-frequency coefficient generation. We found that we could tweak how many coefficients it returned and decided that we would look further into the number of coefficients to use as features to find the best accuracy with different learning models if the MFCC provided any improvement - and it did.
+
 We noticed a large improvement in accuracy by using MFCCs as features. Our simple Perceptron learner achieved 92\% training accuracy on the data set using 10-fold cross validation, where earlier methods of feature generation only achieved as high as 75\% accuracy.
 
 \begin{figure}[H]
