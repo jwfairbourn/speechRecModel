@@ -1,7 +1,5 @@
 %%%% ijcai09.tex
 
-%TODO: format graphs better
-
 \documentclass{article}
 % The file ijcai09.sty is the style file for IJCAI-09 (same as ijcai07.sty).
 \usepackage{ijcai09}
@@ -12,6 +10,8 @@
 % Set up graphics
 \usepackage{graphicx}
 \graphicspath{ {../graphs_and_data/} }
+
+\usepackage{float}
 
 % the following package is optional:
 %\usepackage{latexsym} 
@@ -138,7 +138,7 @@ To generate Mel-frequency coefficients, we take the Fourier transform of the sig
 
 We noticed a large improvement in accuracy by using MFCCs as features. Our simple Perceptron learner achieved 92\% training accuracy on the data set using 10-fold cross validation, where earlier methods of feature generation only achieved as high as 75\% accuracy.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \includegraphics[width=\linewidth]{feature_generation_methods}
 \end{figure}
 
@@ -147,7 +147,7 @@ We noticed a large improvement in accuracy by using MFCCs as features. Our simpl
 
 We chose to use the Weka software to help us quickly select optimal learning models. We tried many different models including Perceptron, VotedPerceptron, Multilayer Perceptron, Dagging, Hyperpipes, DecisionTable, and KNN. Below are the resulting accuracies using 10 fold cross validation for each of these models:
 
-\begin{table}[]
+\begin{table}[H]
 \centering
 \caption{My caption}
 \label{my-label}
@@ -170,7 +170,7 @@ Overall, we found that the Perceptron, MLP (learning rate 0.3, momentum 0.2), an
 
 As mentioned in 2.1, we gathered a subset of voice recordings done with some background noise. We were interested in seeing which of the three best-thus-far learning models would perform better when we introduced the background noise. Without noise, the MLP and KNN learning models were nearly equal, but when we introduced the recordings with background noise, we found that the accuracy of MLP dropped significantly more than the KNN learning model.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \includegraphics[width=\linewidth]{WithNoise_comparison}
 \end{figure}
 
@@ -178,7 +178,7 @@ As mentioned in 2.1, we gathered a subset of voice recordings done with some bac
 
 We then decided to continue experimenting with KNN and try to determine the optimal value for K given our data set.  To do this, we carried out 10-fold cross validation tests with k-values of 1, 3, 5, and 7.  For each k-value, we also tested different amounts of cepstral coefficients used as features in the model.  These counts included 5, 10, 15, 20, and 25 coefficients.  This resulted in a total of 20 tests, the results of which are displayed in the following graph:
 
-\begin{figure}[h]
+\begin{figure}[H]
 \includegraphics[width=\linewidth]{KNN_accuracies_with_different_coeff}
 \end{figure}
 
@@ -188,7 +188,7 @@ It is interesting to note that an unusual pattern is emerging.  As we add more c
 
 Among all of our different learning models, all of them scored with a better accuracy than the baseline, which is 50\% - male or female. In the end, we found that the Perceptron, MLP, and KNN learning models scored the highest, each of them in the range of  88 to 98 percent.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \includegraphics[width=\linewidth]{final_comparison}
 \end{figure}
 
