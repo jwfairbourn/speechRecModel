@@ -1,11 +1,17 @@
 %%%% ijcai09.tex
 
+%TODO: format graphs better
+
 \documentclass{article}
 % The file ijcai09.sty is the style file for IJCAI-09 (same as ijcai07.sty).
 \usepackage{ijcai09}
 
 % Use the postscript times font!
 \usepackage{times}
+
+% Set up graphics
+\usepackage{graphicx}
+\graphicspath{ {../graphs_and_data/} }
 
 % the following package is optional:
 %\usepackage{latexsym} 
@@ -74,7 +80,7 @@ $$
 
 To apply this equation to each of our audio files, we created a Python script that parses through each file and uses the Numpy package to perform the required operations as defined above.  Our initial implementation would then store the first ten non-infinite coefficients as features for each audio file and either male or female as the classification (determined by the name of the directory that contained the file).  These features and classifications were then output to a file following standard .arff syntax.
 
-Because of the model’s success with predicting nominal classes from continuous features, we decided that we would use the Multi-Layer Perceptron as our initial testing model.  However, this model requires a large amount of input data in order to be effective, and since we were still in the process of manually collecting our data, we decided to use the Perceptron as an initial baseline estimate.  Once we had gathered enough data, we would then continue our experiments using the MLP model.
+Because of the model's success with predicting nominal classes from continuous features, we decided that we would use the Multi-Layer Perceptron as our initial testing model.  However, this model requires a large amount of input data in order to be effective, and since we were still in the process of manually collecting our data, we decided to use the Perceptron as an initial baseline estimate.  Once we had gathered enough data, we would then continue our experiments using the MLP model.
 
 \section{Initial Results}
 
@@ -128,31 +134,53 @@ As we can see, this approach did not significantly improve our model as expected
 
 We continued to research strategies for feature generation and learned about Mel-frequency Cepstral Coefficients. The mel scale (short for “melody”) is a logarithmic scale to map frequencies in such a way that pitches that are perceived as equally far apart are equally spaced on the scale. In other words, the mel scale converts pitches to a scale that more closely matches human hearing.
 
-To generate Mel-frequency coefficients, we take the Fourier transform of the signal as the first step of generating the cepstrum, but we then map the frequencies from the result of the Fourier transform to the mel scale before we continue. This places the generated cepstral coefficients evenly apart in human hearing ranges. In a way, this makes our learning model “hear” the recordings the same way that a human hears them.
+To generate Mel-frequency coefficients, we take the Fourier transform of the signal as the first step of generating the cepstrum, but we then map the frequencies from the result of the Fourier transform to the mel scale before we continue. This places the generated cepstral coefficients evenly apart in human hearing ranges. In a way, this makes our learning model "hear" the recordings the same way that a human hears them.
 
 We noticed a large improvement in accuracy by using MFCCs as features. Our simple Perceptron learner achieved 92\% training accuracy on the data set using 10-fold cross validation, where earlier methods of feature generation only achieved as high as 75\% accuracy.
 
-TODO: insert graph
+\begin{figure}[h]
+\includegraphics[width=\linewidth]{feature_generation_methods}
+\end{figure}
+
 
 \subsection{Learning Model Refinement}
 
 We chose to use the Weka software to help us quickly select optimal learning models. We tried many different models including Perceptron, VotedPerceptron, Multilayer Perceptron, Dagging, Hyperpipes, DecisionTable, and KNN. Below are the resulting accuracies using 10 fold cross validation for each of these models:
 
-TODO: insert table
+\begin{table}[]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabular}{|l|l|}
+\hline
+Learning Model        & Accuracy \\ \hline
+KNN                   & 98\%     \\ \hline
+Multilayer Perceptron & 96\%     \\ \hline
+Perceptron            & 93\%     \\ \hline
+Dagging               & 90\%     \\ \hline
+DecisionTable         & 83\%     \\ \hline
+Hyperpipes            & 67\%     \\ \hline
+VotedPerceptron       & 65\%     \\ \hline
+\end{tabular}
+\end{table}
 
-Overall, we found that the Perceptron, MLP, and KNN learning models performed the best and we decided to investigate and improve them further.
+Overall, we found that the Perceptron, MLP (learning rate 0.3, momentum 0.2), and KNN learning models performed the best and we decided to investigate and improve them further.
 
 \subsubsection{Introduction of background noise}
 
 As mentioned in 2.1, we gathered a subset of voice recordings done with some background noise. We were interested in seeing which of the three best-thus-far learning models would perform better when we introduced the background noise. Without noise, the MLP and KNN learning models were nearly equal, but when we introduced the recordings with background noise, we found that the accuracy of MLP dropped significantly more than the KNN learning model.
 
-TODO: insert graph
+\begin{figure}[h]
+\includegraphics[width=\linewidth]{WithNoise_comparison}
+\end{figure}
 
 \subsubsection{Finding the optimal K for KNN}
 
 We then decided to continue experimenting with KNN and try to determine the optimal value for K given our data set.  To do this, we carried out 10-fold cross validation tests with k-values of 1, 3, 5, and 7.  For each k-value, we also tested different amounts of cepstral coefficients used as features in the model.  These counts included 5, 10, 15, 20, and 25 coefficients.  This resulted in a total of 20 tests, the results of which are displayed in the following graph:
 
-TODO: insert graph
+\begin{figure}[h]
+\includegraphics[width=\linewidth]{KNN_accuracies_with_different_coeff}
+\end{figure}
 
 It is interesting to note that an unusual pattern is emerging.  As we add more cepstral coefficients into our training data, the accuracy of the learning model increases, as opposed to decreasing as we initially expected.  In addition, it appears that k-values of 1 and 3 appear to be more accurate than other k-values.  While it is possible that this is explained by the fact that our training data contained 3-5 recordings of the same person, it is still interesting to observe that as more coefficients are used in the data, the more closely the model can represent gender based on the MFCC of the signal.
 
@@ -160,19 +188,21 @@ It is interesting to note that an unusual pattern is emerging.  As we add more c
 
 Among all of our different learning models, all of them scored with a better accuracy than the baseline, which is 50\% - male or female. In the end, we found that the Perceptron, MLP, and KNN learning models scored the highest, each of them in the range of  88 to 98 percent.
 
-TODO: insert graph
+\begin{figure}[h]
+\includegraphics[width=\linewidth]{final_comparison}
+\end{figure}
 
 We believe that using the MFCC algorithm on our audio recordings was truly an essential part in increasing our prediction accuracy.
 
-It seemed like we had a clear winner with KNN where K = 1 when we introduced recordings with background noise; however, it was pointed out to us afterwards that perhaps the three to five recordings of each person could have been the cause of the KNN model working better with our 10 fold cross validation method. Essentially, we were training our model with a few of the 3-5 recordings per person and testing with the rest. This would certainly have an effect on our test set accuracies and perhaps our choice of K for KNN. With more time, we would like to improve our accuracy results with a more “pure” test set.
+It seemed like we had a clear winner with KNN where K = 1 when we introduced recordings with background noise; however, it was pointed out to us afterwards that perhaps the three to five recordings of each person could have been the cause of the KNN model working better with our 10 fold cross validation method. Essentially, we were training our model with a few of the 3-5 recordings per person and testing with the rest. This would certainly have an effect on our test set accuracies and perhaps our choice of K for KNN. With more time, we would like to improve our accuracy results with a more "pure" test set.
 
 \section{Future Work}
 
 When we took on this project, we knew that there would be more ways to extend this idea of predicting gender from speech. What if we could detect the ages of an individual based on their speech? Knowing both the gender and the age of an individual could play a major part in relevant searches and ads.
 
-We would also like to explore the idea of doing speaker recognition in order to unlock mobile phones or other locks. We believe this is very possible, but we would also like to see if we could catch any attempt to forge a person’s voice, i.e. using a recording of a person to unlock his phone.
+We would also like to explore the idea of doing speaker recognition in order to unlock mobile phones or other locks. We believe this is very possible, but we would also like to see if we could catch any attempt to forge a person's voice, i.e. using a recording of a person to unlock his phone.
 
-In this project, we tried to control certain aspects of the data gathering by using a specific voice recording device. Lower quality microphones would introduce more noise to the data, so making our model more robust to these recordings would be another problem to solve. We’d like to gather recordings from microphones on mobile phones and computers and see how that affects our accuracy. One thing that we could do is synthesize random noise in all of our recordings and try to find ways to eliminate that noise.
+In this project, we tried to control certain aspects of the data gathering by using a specific voice recording device. Lower quality microphones would introduce more noise to the data, so making our model more robust to these recordings would be another problem to solve. We'd like to gather recordings from microphones on mobile phones and computers and see how that affects our accuracy. One thing that we could do is synthesize random noise in all of our recordings and try to find ways to eliminate that noise.
 
 \appendix
 
