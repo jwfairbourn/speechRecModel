@@ -1,0 +1,18 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Lyons}{2012}]{mfcc:tutorial}
+James Lyons.
+\newblock Mel frequency cepstral coefficient (mfcc) tutorial, 2012.
+\newblock [Online; accessed December-2015].
+
+\bibitem[\protect\citeauthoryear{Lyons}{2015}]{github}
+James Lyons.
+\newblock Python speech features, 2015.
+\newblock [Online; accessed December-2015].
+
+\bibitem[\protect\citeauthoryear{Wikipedia}{2015}]{wiki:1}
+Wikipedia.
+\newblock Cepstrum --- {W}ikipedia{,} the free encyclopedia, 2015.
+\newblock [Online; accessed December-2015].
+
+\end{thebibliography}

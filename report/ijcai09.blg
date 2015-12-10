@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2012)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: ijcai09.aux
+The style file: named.bst
+Database file #1: ijcai09.bib
+Warning--entry type for "mfcc:tutorial" isn't style-file defined
+--line 10 of file ijcai09.bib
+Warning--entry type for "github" isn't style-file defined
+--line 18 of file ijcai09.bib
+You've used 3 entries,
+            2439 wiz_defined-function locations,
+            561 strings with 4668 characters,
+and the built_in function-call counts, 804 in all, are:
+= -- 78
+> -- 21
+< -- 0
++ -- 6
+- -- 6
+* -- 42
+:= -- 135
+add.period$ -- 9
+call.type$ -- 3
+change.case$ -- 15
+chr.to.int$ -- 3
+cite$ -- 3
+duplicate$ -- 30
+empty$ -- 76
+format.name$ -- 9
+if$ -- 167
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 0
+newline$ -- 18
+num.names$ -- 9
+pop$ -- 27
+preamble$ -- 1
+purify$ -- 18
+quote$ -- 0
+skip$ -- 34
+stack$ -- 0
+substring$ -- 15
+swap$ -- 6
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 24
+warning$ -- 0
+while$ -- 6
+width$ -- 4
+write$ -- 38
+(There were 2 warnings)
