@@ -64,11 +64,11 @@ In a speaker recognition problem, we can choose the type of application by the a
 
 In order to do gender recognition from speech, we needed to gather voice recordings of people saying some word or phrase. Initially, we decided that we would like to have at least a little consistency in our data, so we selected one type of high-quality microphone to train our model to: Olympus LS-3. In addition to having a consistent recording, we also wanted to have a consistent phrase.  We each went from door to door and from family gatherings to friend gatherings, collecting voice recordings of people saying the phrase "open sesame."
 
-Though we did have some consistencies, we also wanted to have some variations so as to train our learning model well enough. We recorded each person three to five times, each time having them use different inflections. For example, we would ask the individual to say "open sesame" as a statement and then as a question. Another variation we introduced was background noise. We had a subset of recordings that were done at a family Thanksgiving event, which had some people talking in the background. We hoped that with these slight variations, we would be able to have enough data to allow our learning model to make the best guess possible.
+Though we did have some consistencies, we also wanted to have some variations so as to train our learning model well enough. We recorded each person three to five times, each time having them use different inflections. For example, we would ask the individual to say "open sesame" as a statement and then as a question. Another variation we introduced was background noise. We had a subset of recordings that were done at a family Thanksgiving event, which had some people talking in the background. We hoped that with these slight variations, we would be able to have enough data to allow our learning model to make the best guess possible. We decided to keep that subset of noisy data to further refine our choice of a learning model.
 
 One potential problem that we were cautious about was the difference in ages of our speakers. A younger male boy could sound more like a female voice than a male one. So as a precaution, we also wrote down the ages of the individuals.
 
-We ended up with 106 male recordings and 72 female recordings which is roughly a 60/40 split. Due to our current location, most of our recordings were of people within the college age range. 
+We ended up with 106 male recordings and 72 female recordings which is roughly a 60/40 split. Due to our current location, most of our recordings were of people within the college age range so the recording of ages turned out to be irrelevant with our data set.
 
 \subsection{Initial Model}
 
@@ -145,7 +145,7 @@ We noticed a large improvement in accuracy by using MFCCs as features. Our simpl
 
 \subsection{Learning Model Refinement}
 
-We chose to use the Weka software to help us quickly select optimal learning models. We tried many different models including Perceptron, VotedPerceptron, Multilayer Perceptron, Dagging, Hyperpipes, DecisionTable, and KNN. Below are the resulting accuracies using 10 fold cross validation for each of these models:
+We chose to use the Weka software to help us quickly select optimal learning models. We tried many different models including the Perceptron, VotedPerceptron, Multilayer Perceptron, Dagging, Hyperpipes, DecisionTable, and KNN. Below are the resulting accuracies using 10 fold cross validation for each of these models:
 
 \begin{table}[H]
 \centering
@@ -168,7 +168,7 @@ Overall, we found that the Perceptron, MLP (learning rate 0.3, momentum 0.2), an
 
 \subsubsection{Introduction of background noise}
 
-As mentioned in 2.1, we gathered a subset of voice recordings done with some background noise. We were interested in seeing which of the three best-thus-far learning models would perform better when we introduced the background noise. Without noise, the MLP and KNN learning models were nearly equal, but when we introduced the recordings with background noise, we found that the accuracy of MLP dropped significantly more than the KNN learning model.
+As mentioned in 2.1, we gathered a subset of voice recordings done with some background noise. We were interested in seeing which of the three best-thus-far learning models would perform better when we introduced the background noise. We noted that without noise, the MLP and KNN learning models were nearly equal, but when we introduced the recordings with background noise, we found that the accuracy of MLP dropped significantly more than the KNN learning model from 98\% to 90\% while the KNN learning model had a 96\% accuracy.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{WithNoise_comparison}
@@ -186,15 +186,15 @@ It is interesting to note that an unusual pattern is emerging.  As we add more c
 
 \section{Final Results and Conclusions}
 
-Among all of our different learning models, all of them scored with a better accuracy than the baseline, which is 50\% - male or female. In the end, we found that the Perceptron, MLP, and KNN learning models scored the highest, each of them in the range of  88 to 98 percent.
+Among all of our different learning models, all of them scored with a better accuracy than the baseline, which is 50\% - male or female. In the end, we found that the Perceptron, MLP, and KNN learning models scored the highest, each of them in the range of 88 to 98 percent.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{final_comparison}
 \end{figure}
 
-We believe that using the MFCC algorithm on our audio recordings was truly an essential part in increasing our prediction accuracy.
+We believe that using the MFCC algorithm on our audio recordings was truly an essential part in increasing our prediction accuracy. Transforming the audio signals to a scale that matches human hearing caused our perceptron learning model to jump from 75\% to 93\%. 
 
-It seemed like we had a clear winner with KNN where K = 1 when we introduced recordings with background noise; however, it was pointed out to us afterwards that perhaps the three to five recordings of each person could have been the cause of the KNN model working better with our 10 fold cross validation method. Essentially, we were training our model with a few of the 3-5 recordings per person and testing with the rest. This would certainly have an effect on our test set accuracies and perhaps our choice of K for KNN. With more time, we would like to improve our accuracy results with a more "pure" test set.
+It seemed like we had a clear winner with KNN where K = 1 when we introduced recordings with background noise; however, it was pointed out to us afterwards that perhaps the three to five recordings of each person could have been the cause of the KNN model working better with our 10 fold cross validation method. Essentially, we were training our model with a few of the 3-5 recordings per person and testing with the rest. This would certainly have an effect on our test set accuracies and perhaps our choice of K for KNN. With more time, we would like to improve our accuracy results with a more "pure" test set. If upon improving our test set we discover that KNN doesn't prove to be as good, we would also try to gather more voice recordings to help improve the Multilayer Perceptron model.
 
 \section{Future Work}
 
@@ -203,6 +203,8 @@ When we took on this project, we knew that there would be more ways to extend th
 We would also like to explore the idea of doing speaker recognition in order to unlock mobile phones or other locks. We believe this is very possible, but we would also like to see if we could catch any attempt to forge a person's voice, i.e. using a recording of a person to unlock his phone.
 
 In this project, we tried to control certain aspects of the data gathering by using a specific voice recording device. Lower quality microphones would introduce more noise to the data, so making our model more robust to these recordings would be another problem to solve. We'd like to gather recordings from microphones on mobile phones and computers and see how that affects our accuracy. One thing that we could do is synthesize random noise in all of our recordings and try to find ways to eliminate that noise.
+
+The current trends in technology going on in the world right now are putting more and more focus on signal processing. With these ideas of future work to be done, we hope to assist in merging signal processing with machine learning to improve our world.
 
 \appendix
 
